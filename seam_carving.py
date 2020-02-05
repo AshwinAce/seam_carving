@@ -123,8 +123,10 @@ def generate_energy_matrix(img):
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True,
 	help="path to the input image")
-ap.add_argument("-f", "--file", default=None,
+ap.add_argument("-f", "--file", default=1,
 	help="path to text file containing intensity difference of each pixel, if already generated")
+ap.add_argument("-s", "--size", default=None,
+	help="size to be reduced to as a percent of current width")
 args = vars(ap.parse_args())
 
 img = cv2.imread(args["image"])
@@ -138,11 +140,17 @@ else:
 	with open(args["file"], "rb") as fp:
 		energy = pickle.load(fp)
 
+#num_columns is the number of columns to be removed
+if float(args["size"])>=1:
+	num_columns = int(0.15*img.shape[1])
+else:
+	num_columns = int((1- float(args["size"]))*img.shape[1]) 
+
 mat = copy.deepcopy(energy)
 disp = copy.deepcopy(mat)
 
 #repeated calls to remove multiple seams
-for i in range(200):
+for i in range(num_columns):
 	print(i, " seams removed")
 	if i>0:
 		for point in points_neighbors:
@@ -160,7 +168,7 @@ for i in range(200):
 	delete_points(points,energy)
 img_final = np.asarray(img_modified)
 cv2.imshow('Reduced Image', img_final)
-cv2.imshow('Resized Image', cv2.resize(img,(img.shape[1]-200, img.shape[0])))
+cv2.imshow('Resized Image', cv2.resize(img,(img.shape[1]-num_columns, img.shape[0])))
 cv2.imshow('Original Image', img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

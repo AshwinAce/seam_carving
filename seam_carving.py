@@ -119,6 +119,28 @@ def generate_energy_matrix(img):
 		energy.append(temp)
 	return energy
 
+#function to create a mask based on input
+def create_mask(rects,img):
+	mask = np.ones((img.shape[0],img.shape[1]))
+	for rect in rects:
+		pt1=rect[0]
+		pt2=rect[1]
+		if rect[0][0]<rect[1][0]:
+			left = rect[0][0]
+			right = rect[1][0]
+		else:
+			left = rect[1][0]
+			right = rect[0][0]
+		if rect[0][1] < rect[1][1]:
+			up = rect[0][1]
+			down = rect[1][1]
+		else:
+			up = rect[1][1]
+			down = rect[0][1]
+		#print(up,down,left,right)
+		mask[max(up,0):down,max(left,0):right] = 10
+	return mask
+
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True,
